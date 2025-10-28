@@ -1,0 +1,100 @@
+import React, { useState } from 'react';
+import { StyleSheet, View, Text, Image, ScrollView, TextInput } from 'react-native';
+
+const minhaImagem2 = require('./assets/MINHA SAUDE.png');
+const minhaImagem3 = require('./assets/qual_o_melhor_plano_de_saude_banner_96.png');
+export default function App() {
+  const [texto, setTexto] = useState('');
+
+  const dados = [
+    ['MEU PLANO DE SAUDE','CADASTRO','PLANO'],
+    ['CARENCIA','ATIVO','PESSOAL'],
+  ];
+
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      <Image source={minhaImagem2} style={styles.imagem} />
+    
+      {/* Tabela */}
+      <View>
+        {dados.map((linha, index) => (
+          <View
+            key={index}
+            style={[styles.linha, index === 0 ? styles.cabecalho : null]}
+          >
+            {linha.map((celula, i) => (
+              <View key={i} style={styles.celula}>
+                <Text style={index === 0 ? styles.textoCabecalho : styles.texto}>
+                  {celula}
+                </Text>
+              </View>
+            ))}
+          </View>
+        ))}
+		  <Image source={minhaImagem3} style={styles.imagem2} />
+      </View>
+  
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    backgroundColor: '#fff5ee',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    paddingTop: 20,
+    paddingBottom: 20,
+  },
+  imagem: {
+    width: 300,
+    height: 300,
+    resizeMode: 'contain',
+    marginBottom: 30,
+	},
+	imagem2: {
+    width: 500,
+    height:300,
+    resizeMode: 'contain',
+    marginBottom: 5,
+  },
+  linha: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  cabecalho: {
+    backgroundColor: '#FF7F50',
+  },
+  celula: {
+    width: 120,
+    padding: 10,
+    borderRightWidth: 1,
+    borderRightColor: '#ccc',
+  },
+  texto: {
+    fontSize: 16,
+    color: 'black',
+  },
+  textoCabecalho: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  input: {
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    marginTop: 20,
+    width: '80%',
+    paddingLeft: 10,
+    color: 'red',
+  },
+  textoInput: {
+    marginTop: 10,
+    fontSize: 16,
+    color: 'black',
+  },
+});
