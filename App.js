@@ -1,45 +1,83 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  StyleSheet, 
-  Alert, 
-  Image, 
-  ScrollView 
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  Image,
+  ScrollView,
 } from 'react-native';
 
 const minhaImagem2 = require('./assets/MINHA SAUDE.png');
 const minhaImagem3 = require('./assets/qual_o_melhor_plano_de_saude_banner_96.png');
 
 export default function App() {
+  const [screen, setScreen] = useState('login'); // 'login' | 'register' | 'home'
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [usuarios, setUsuarios] = useState([]); // Armazena usuários cadastrados
+  const [nome, setNome] = useState('');
+  const [cpf, setCpf] = useState('');
+  const [confirmarSenha, setConfirmarSenha] = useState('');
 
+  // ---------- FUNÇÕES DE LOGIN / CADASTRO ----------
   const handleLogin = () => {
     if (email === '' || senha === '') {
       Alert.alert('Erro', 'Preencha todos os campos!');
       return;
     }
 
-    // Simulação de login
-    if (email === 'teste@exemplo.com' && senha === '123456') {
+    const usuarioEncontrado = usuarios.find(
+      (u) => u.email === email && u.senha === senha
+    );
+
+    if (usuarioEncontrado) {
       Alert.alert('Sucesso', 'Login realizado com sucesso!');
-      setIsLoggedIn(true);
+      setScreen('home');
+      setEmail('');
+      setSenha('');
     } else {
       Alert.alert('Erro', 'Email ou senha incorretos.');
     }
   };
 
-  const dados = [
-    ['MEU PLANO DE SAUDE','CADASTRO','PLANO'],
-    ['CARENCIA','ATIVO','PESSOAL'],
-  ];
+  const handleRegister = () => {
+    if (!nome || !email || !cpf || !senha || !confirmarSenha) {
+      Alert.alert('Erro', 'Preencha todos os campos!');
+      return;
+    }
 
-  // SE NÃO ESTIVER LOGADO → Mostra tela de Login
-  if (!isLoggedIn) {
+    if (senha !== confirmarSenha) {
+      Alert.alert('Erro', 'As senhas não coincidem!');
+      return;
+    }
+
+    const usuarioExistente = usuarios.find((u) => u.email === email);
+    if (usuarioExistente) {
+      Alert.alert('Erro', 'Já existe um usuário com este e-mail.');
+      return;
+    }
+
+    const novoUsuario = { nome, email, cpf, senha };
+    setUsuarios([...usuarios, novoUsuario]);
+    Alert.alert('Sucesso', 'Cadastro realizado com sucesso! Faça login.');
+    setScreen('login');
+    // Limpar campos
+    setNome('');
+    setEmail('');
+    setCpf('');
+    setSenha('');
+    setConfirmarSenha('');
+  };
+
+  const handleLogout = () => {
+    setScreen('login');
+  };
+
+  // ---------- TELAS ----------
+  if (screen === 'login') {
     return (
       <View style={styles.container}>
         <Text style={styles.title}>Seja Bem-vindo(a)!</Text>
@@ -67,19 +105,84 @@ export default function App() {
           <Text style={styles.buttonText}>Entrar</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => setScreen('register')}>
           <Text style={styles.registerText}>Não tem conta? Cadastre-se</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
-  // SE ESTIVER LOGADO → Mostra conteúdo do "Código 2"
+  if (screen === 'register') {
+    return (
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Criar Conta</Text>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Nome completo"
+          placeholderTextColor="#888"
+          value={nome}
+          onChangeText={setNome}
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          placeholderTextColor="#888"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="CPF"
+          placeholderTextColor="#888"
+          value={cpf}
+          onChangeText={setCpf}
+          keyboardType="numeric"
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Senha"
+          placeholderTextColor="#888"
+          value={senha}
+          onChangeText={setSenha}
+          secureTextEntry
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Confirmar senha"
+          placeholderTextColor="#888"
+          value={confirmarSenha}
+          onChangeText={setConfirmarSenha}
+          secureTextEntry
+        />
+
+        <TouchableOpacity style={styles.button} onPress={handleRegister}>
+          <Text style={styles.buttonText}>Cadastrar</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => setScreen('login')}>
+          <Text style={styles.registerText}>Já tem conta? Fazer login</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    );
+  }
+
+  // ---------- TELA APÓS LOGIN ----------
+  const dados = [
+    ['MEU PLANO DE SAUDE', 'CADASTRO', 'PLANO'],
+    ['CARENCIA', 'ATIVO', 'PESSOAL'],
+  ];
+
   return (
     <ScrollView contentContainerStyle={styles2.container}>
       <Image source={minhaImagem2} style={styles2.imagem} />
-    
-      {/* Tabela */}
+
       <View>
         {dados.map((linha, index) => (
           <View
@@ -95,26 +198,31 @@ export default function App() {
             ))}
           </View>
         ))}
-		    <Image source={minhaImagem3} style={styles2.imagem2} />
+        <Image source={minhaImagem3} style={styles2.imagem2} />
       </View>
+
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <Text style={styles.logoutText}>Sair</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
 
-// ---------- ESTILOS DA TELA DE LOGIN ----------
+// ---------- ESTILOS DA TELA DE LOGIN / CADASTRO ----------
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: '#FFFAFA',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 20,
+    paddingVertical: 40,
   },
   title: {
     fontSize: 28,
     color: '#FF751F',
     fontWeight: 'bold',
-    marginBottom: 40,
+    marginBottom: 30,
   },
   input: {
     width: '100%',
@@ -146,9 +254,20 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontWeight: '500',
   },
+  logoutButton: {
+    marginTop: 30,
+    backgroundColor: '#FF751F',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  logoutText: {
+    color: '#FFF',
+    fontWeight: 'bold',
+  },
 });
 
-// ---------- ESTILOS DO CONTEÚDO APÓS LOGIN ----------
+// ---------- ESTILOS DA TELA APÓS LOGIN ----------
 const styles2 = StyleSheet.create({
   container: {
     flexGrow: 1,
@@ -163,10 +282,10 @@ const styles2 = StyleSheet.create({
     height: 300,
     resizeMode: 'contain',
     marginBottom: 30,
-	},
-	imagem2: {
+  },
+  imagem2: {
     width: 500,
-    height:300,
+    height: 300,
     resizeMode: 'contain',
     marginBottom: 5,
   },
