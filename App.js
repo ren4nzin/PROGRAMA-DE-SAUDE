@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // ✅ Importação
 
 const minhaImagem2 = require('./assets/MINHA SAUDE.png');
 const minhaImagem3 = require('./assets/qual_o_melhor_plano_de_saude_banner_96.png');
@@ -21,6 +22,30 @@ export default function App() {
   const [nome, setNome] = useState('');
   const [cpf, setCpf] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
+
+  // ---------- CARREGAR USUÁRIOS SALVOS AO INICIAR ----------
+  useEffect(() => {
+    const carregarUsuarios = async () => {
+      try {
+        const usuariosSalvos = await AsyncStorage.getItem('usuarios');
+        if (usuariosSalvos) {
+          setUsuarios(JSON.parse(usuariosSalvos));
+        }
+      } catch (error) {
+        console.log('Erro ao carregar usuários:', error);
+      }
+    };
+    carregarUsuarios();
+  }, []);
+
+  // ---------- SALVAR USUÁRIOS NO ASYNCSTORAGE ----------
+  const salvarUsuarios = async (novosUsuarios) => {
+    try {
+      await AsyncStorage.setItem('usuarios', JSON.stringify(novosUsuarios));
+    } catch (error) {
+      console.log('Erro ao salvar usuários:', error);
+    }
+  };
 
   // ---------- FUNÇÕES DE LOGIN / CADASTRO ----------
   const handleLogin = () => {
@@ -43,7 +68,7 @@ export default function App() {
     }
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!nome || !email || !cpf || !senha || !confirmarSenha) {
       Alert.alert('Erro', 'Preencha todos os campos!');
       return;
@@ -61,9 +86,14 @@ export default function App() {
     }
 
     const novoUsuario = { nome, email, cpf, senha };
-    setUsuarios([...usuarios, novoUsuario]);
+    const novosUsuarios = [...usuarios, novoUsuario];
+    setUsuarios(novosUsuarios);
+
+    await salvarUsuarios(novosUsuarios); // ✅ Salva localmente
+
     Alert.alert('Sucesso', 'Cadastro realizado com sucesso! Faça login.');
     setScreen('login');
+
     // Limpar campos
     setNome('');
     setEmail('');
@@ -208,7 +238,7 @@ export default function App() {
   );
 }
 
-// ---------- ESTILOS DA TELA DE LOGIN / CADASTRO ----------
+// ---------- ESTILOS ----------
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
@@ -267,7 +297,6 @@ const styles = StyleSheet.create({
   },
 });
 
-// ---------- ESTILOS DA TELA APÓS LOGIN ----------
 const styles2 = StyleSheet.create({
   container: {
     flexGrow: 1,
